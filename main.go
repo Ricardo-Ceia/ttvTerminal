@@ -1,19 +1,13 @@
 package main
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"io"
 	"os"
 	"github.com/joho/godotenv"
+	"ttvTerminal/User"
 )
-
-type User struct {
-	Data []struct {
-		ID string `json:"id"`
-	} `json:"data"`
-}
 
 func main(){
 	godotenv.Load()
@@ -27,6 +21,13 @@ func main(){
 		log.Fatal(err)
 	}
 	
+	userFile,	err := os.Create("userData.txt")
+	if err!=nil{
+		log.Fatal(err)
+	} 
+	//Think about this defer -> the file should be closed when its no longer needed 
+	defer userFile.Close()
+
 	bearerString := fmt.Sprintf("Bearer %s", access_token)
 	req.Header.Add("Authorization", bearerString)
 	req.Header.Add("Client-Id", client_id)
@@ -36,19 +37,16 @@ func main(){
 	if err != nil {
 		log.Fatal(err)
 	}
+	//Think about this defer -> the body should be closed when its no longer needed
 	defer res.Body.Close()
 	
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var user User
-
-	err = json.Unmarshal(body,&user)
+	
+	err = User.FillUserDataFile(body,userFile)
 	if err!=nil{
 		log.Fatal(err)
 	}
-
-	user_id := user.Data[0].ID
-	fmt.Println("id:",user_id)
 }
