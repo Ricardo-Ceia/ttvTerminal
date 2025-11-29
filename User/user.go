@@ -1,8 +1,9 @@
 package User
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
+	"log"
 	"os"
 )
 
@@ -36,9 +37,27 @@ func FillUserDataFile(data []byte,file *os.File) error{
 	return err
 }
 
-/*
-func GetUserId(user User){
-	return 
+func GetUserInfo(file *os.File) User{
+	var user User
+	
+	userDataBytes := make([]byte,1024) 
+	numberOfBytesRead,err := file.Read(userDataBytes)
+	
+	if err!=nil{
+		log.Fatal(err)
+	}
+	
+	if numberOfBytesRead==0{
+		log.Fatal("User info file is empty!")
+	}
+	
+	decoder := json.NewDecoder(bytes.NewReader(userDataBytes))
+	err = decoder.Decode(&user)
+	
+	if err!=nil{
+		log.Fatal(err)
+	}
+
+	return user
 }
-*/
 
