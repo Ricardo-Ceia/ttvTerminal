@@ -11,7 +11,6 @@ import (
 
 func main(){
 	godotenv.Load()
-	
 	access_token := os.Getenv("TWITCH_ACCESS_TOKEN")
 	client_id := os.Getenv("TWITCH_CLIENT_ID")
 	username := "ronaldomadeir" 	
@@ -34,9 +33,11 @@ func main(){
 	
 	client := &http.Client{}
 	res, err := client.Do(req)
+	
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	//Think about this defer -> the body should be closed when its no longer needed
 	defer res.Body.Close()
 	
@@ -44,7 +45,7 @@ func main(){
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	err = User.FillUserDataFile(body,userFile)
 	if err!=nil{
 		log.Fatal(err)
