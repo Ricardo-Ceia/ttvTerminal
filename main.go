@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"io"
 	"os"
+	"os/exec"
 	"github.com/joho/godotenv"
 	"ttvTerminal/User"
 )
@@ -13,14 +14,15 @@ func main(){
 	godotenv.Load()
 	access_token := os.Getenv("TWITCH_ACCESS_TOKEN")
 	client_id := os.Getenv("TWITCH_CLIENT_ID")
-	username := "ronaldomadeir" 	
+	username := "ronaldomadeir"
+	userFileName := "userData.txt"
 	req, err := http.NewRequest("GET", "https://api.twitch.tv/helix/users?login=" + username, nil)
 	
 	if err != nil {
 		log.Fatal(err)
 	}
 	
-	userFile,	err := os.Create("userData.txt")
+	userFile,	err := os.Create(userFileName)
 	if err!=nil{
 		log.Fatal(err)
 	} 
@@ -47,12 +49,21 @@ func main(){
 	if err != nil {
 		log.Fatal(err)
 	}
-	userFile, err = os.Open("userData.txt")
+	
+	userFile, err = os.Open(userFileName)
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer userFile.Close()
 	
 	user := User.GetUserInfo(userFile)
 	fmt.Printf("%+v",user)
+
+	cmd := exec.Command("rm",userFileName)
+	err = cmd.Run()
+
+	if err!=nil{
+		log.Printf("Error (%v) executing rm %s",err,userFileName)
+	}
 }
