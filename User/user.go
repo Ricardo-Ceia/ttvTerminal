@@ -1,14 +1,10 @@
 package User
 
 import (
-	"bytes"
 	"encoding/json"
-	"log"
-	"os"
 )
 
-type User struct {
-	Data []struct {
+type UserData struct {
 		ID              string `json:"id"`
 		Login           string `json:"login"`
 		DisplayName     string `json:"display_name"`
@@ -19,45 +15,18 @@ type User struct {
 		OfflineImageUrl string `json:"offline_image_url"`
 		ViewCount       int    `json:"view_count"`
 		CreatedAt       string `json:"created_at"`
-	} `json:"data"`
 }
 
-func FillUserDataFile(data []byte,file *os.File) error{
-	var user User
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	err := decoder.Decode(&user)
-
-	if err!=nil{
-		return err
-	}
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent(""," ")
-	err = encoder.Encode(user)
-	return err
+type User struct {
+	Data	[]UserData `json:"data"`
 }
 
-func GetUserInfo(file *os.File) User{
-	var user User
-	
-	userDataBytes := make([]byte,1024) 
-	numberOfBytesRead,err := file.Read(userDataBytes)
-	
-	if err!=nil{
-		log.Fatal(err)
-	}
-	
-	if numberOfBytesRead==0{
-		log.Fatal("User info file is empty!")
-	}
-	
-	decoder := json.NewDecoder(bytes.NewReader(userDataBytes))
-	err = decoder.Decode(&user)
-	
-	if err!=nil{
-		log.Fatal(err)
-	}
+func ParseUser(data []byte) (UserData,error){
+	var response User 
+	err := json.Unmarshal(data,&response)
 
-	return user
+	if err!=nil{
+		return UserData{},err
+	}
+	return response.Data[0], nil
 }
-
