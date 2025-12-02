@@ -2,12 +2,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
-	"io"
 	"os"
 	"os/exec"
 	"github.com/joho/godotenv"
 	"ttvTerminal/User"
+	"ttvTerminal/Client"
 )
 
 func main(){
@@ -16,11 +15,9 @@ func main(){
 	client_id := os.Getenv("TWITCH_CLIENT_ID")
 	username := "ronaldomadeir"
 	userFileName := "userData.txt"
-	req, err := http.NewRequest("GET", "https://api.twitch.tv/helix/users?login=" + username, nil)
+	ttvClient := Client.NewTwitchClient(access_token,client_id)
+	userUrl := "/users?login=" + username
 	
-	if err != nil {
-		log.Fatal(err)
-	}
 	
 	userFile,	err := os.Create(userFileName)
 	if err!=nil{
@@ -28,29 +25,20 @@ func main(){
 	} 
 	defer userFile.Close()
 
-	bearerString := fmt.Sprintf("Bearer %s", access_token)
-	req.Header.Add("Authorization", bearerString)
-	req.Header.Add("Client-Id", client_id)
-	
-	client := &http.Client{}
-	res, err := client.Do(req)
+	userData,	err := ttvClient.Get(userUrl)	
 	
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer res.Body.Close()
 	
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	err = User.FillUserDataFile(userData, userFile)
 	
-	err = User.FillUserDataFile(body, userFile)
 	if err != nil {
 		log.Fatal(err)
 	}
 	
 	userFile, err = os.Open(userFileName)
+	
 	if err != nil {
 		log.Fatal(err)
 	}
