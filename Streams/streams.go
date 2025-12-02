@@ -1,6 +1,8 @@
 package Streams
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Stream struct {
   StreamId    string `json:"id"`
@@ -28,3 +30,5 @@ func ParseStreams(data []byte) ([]Stream,error){
 	}
 	return response.Data, nil
 }
+
+
